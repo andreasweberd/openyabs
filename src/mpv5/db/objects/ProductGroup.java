@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+
 import mpv5.db.common.Context;
 import mpv5.db.common.DatabaseObject;
 import mpv5.db.common.NodataFoundException;
@@ -236,9 +238,9 @@ public class ProductGroup extends DatabaseObject {
                 } else {
 //                    Log.Debug(ArrayUtilities.class, "Node is no child of parentnode, iterating over the parent node..");
                     @SuppressWarnings("unchecked")
-                    Enumeration<DefaultMutableTreeNode> nodes = firstnode.children();
+                    Enumeration<TreeNode> nodes = firstnode.children();
                     while (nodes.hasMoreElements()) {
-                        addToParents(nodes.nextElement(), dobjlist);
+                        addToParents((DefaultMutableTreeNode) nodes.nextElement(), dobjlist);
                     }
                 }
             }

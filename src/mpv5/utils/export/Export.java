@@ -22,6 +22,7 @@ import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfWriter;
+
 import java.awt.Component;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import mpv5.db.common.Context;
 import mpv5.db.common.DatabaseObject;
 import mpv5.db.common.Formattable;
@@ -60,7 +62,6 @@ import mpv5.utils.print.PrintJob2;
 /**
  * The Export class is the primary handler in Yabs to do exporting tasks, such
  * as printing, generating files etc.
- *
  */
 public final class Export extends HashMap<String, Object> implements Waitable {
 
@@ -73,22 +74,29 @@ public final class Export extends HashMap<String, Object> implements Waitable {
      * @param preloadedTemplate
      * @param dataOwner
      * @param to
+     * @param log
      */
-    public static void mail(Template preloadedTemplate, DatabaseObject dataOwner, Contact to) {
+    public static void mail(Template preloadedTemplate, DatabaseObject dataOwner, Contact to, List<String> log) {
+        QueryCriteria c = new QueryCriteria("usersids", mpv5.db.objects.User.getCurrentUser().__getIDS());
+        MailMessage m = null;
+        try {
+            m = (MailMessage) Popup.SelectValue(DatabaseObject.getObjects(Context.getMessage(), c), Messages.SELECT_A_TEMPLATE);
+            mail(preloadedTemplate, dataOwner, to, log, m);
+        } catch (Exception ex) {
+            Log.Debug(Export.class, ex.getMessage());
+            if (log == null)
+                Popup.notice(Messages.NO_MAIL_TEMPLATE_DEFINED);
+            else
+                log.add(dataOwner.getCname() + "->" + Messages.NO_MAIL_TEMPLATE_DEFINED + "\n");
+        }
+    }
+
+    public static void mail(Template preloadedTemplate, DatabaseObject dataOwner, Contact to, List<String> log, MailMessage m) {
 
         try {
             mpv5.YabsViewProxy.instance().setWaiting(true);
-            QueryCriteria c = new QueryCriteria("usersids", mpv5.db.objects.User.getCurrentUser().__getIDS());
-            MailMessage m = null;
-            boolean send = true;
-            try {
-                m = (MailMessage) Popup.SelectValue(DatabaseObject.getObjects(Context.getMessage(), c), Messages.SELECT_A_TEMPLATE);
-            } catch (Exception ex) {
-                Log.Debug(Export.class, ex.getMessage());
-                send = Popup.Y_N_dialog(Messages.NO_MAIL_TEMPLATE_DEFINED);
-            }
 
-            if (send && m != null) {
+            if (m != null) {
                 Map<String, Object> hm1 = dataOwner.getFormFields();//new FormFieldsHandler(dataOwner).getFormattedFormFields(null);
                 File f2 = FileDirectoryHandler.getTempFile(((Formattable) dataOwner).getFormatHandler().toUserString(), "pdf");
                 Export ex = new Export(preloadedTemplate);
@@ -103,7 +111,7 @@ public final class Export extends HashMap<String, Object> implements Waitable {
                             && cont.__getMailaddress() != null
                             && Pattern.matches(EMAIL_PATTERN, mpv5.db.objects.User.getCurrentUser().__getMail())
                             && Pattern.matches(EMAIL_PATTERN, cont.__getMailaddress())) {
-                        SimpleMail pr = new SimpleMail();
+                        SimpleMail pr = new SimpleMail(log);
                         pr.setMailConfiguration(mpv5.db.objects.User.getCurrentUser().getMailConfiguration());
                         pr.setRecipientsAddress(cont.__getMailaddress());
                         pr.setSenderName(User.getCurrentUser().__getFullname());
@@ -124,21 +132,36 @@ public final class Export extends HashMap<String, Object> implements Waitable {
                         try {
                             pr.setSubject(VariablesHandler.parse(m.__getCname(), dataOwner, hm1));
                             pr.setText(VariablesHandler.parse(m.__getDescription(), dataOwner, hm1));
-                            new Job(ex, (Waiter) pr).execute();
+                            if(log==null)
+                                new Job(ex, (Waiter) pr).execute();
+                            else{
+                                new Job(ex, (Waiter) pr).executeSync();
+                            }
                         } catch (Exception e) {
                             Popup.error(e);
                         }
 
                     } else {
-                        Popup.notice(Messages.NO_MAIL_DEFINED);
+                        if (log == null)
+                            Popup.notice(Messages.NO_MAIL_DEFINED);
+                        else
+                            log.add(dataOwner.getCname() + "->" + Messages.NO_MAIL_DEFINED + "\n");
                     }
                 } catch (UnsupportedOperationException unsupportedOperationException) {
                     Log.Debug(unsupportedOperationException);
-                    Popup.notice(Messages.NOT_POSSIBLE + "\n" + Messages.NO_MAIL_CONFIG);
+
+                    if (log == null)
+                        Popup.notice(Messages.NOT_POSSIBLE + "\n" + Messages.NO_MAIL_CONFIG);
+                    else
+                        log.add(dataOwner.getCname() + "->" + Messages.NOT_POSSIBLE + "\n" + Messages.NO_MAIL_CONFIG + "\n");
                 }
             }
         } catch (Exception e) {
             Log.Debug(e);
+            if (log != null)
+                log.add(dataOwner.getCname() + "->" + Messages.ERROR_OCCURED + ":" + e.getMessage() + "\n");
+            else
+                Popup.error(e);
         } finally {
             mpv5.YabsViewProxy.instance().setWaiting(false);
         }
@@ -499,13 +522,13 @@ public final class Export extends HashMap<String, Object> implements Waitable {
             }
         };
     }
+
     private Exportable fromFile;
     private File toFile;
     private final Template template;
     private DatabaseObject dob;
 
     /**
-     *
      * @param t
      */
     public Export(Template t) {
@@ -541,8 +564,8 @@ public final class Export extends HashMap<String, Object> implements Waitable {
      * <br/>
      *
      * @param toFile The target file. If the file exists, will be overwritten if
-     * possible.
-     * @throws NodataFoundException If no data has been previously added
+     *               possible.
+     * @throws NodataFoundException  If no data has been previously added
      * @throws FileNotFoundException If no file was given as template
      */
     public void processData(File toFile) throws NodataFoundException, FileNotFoundException {

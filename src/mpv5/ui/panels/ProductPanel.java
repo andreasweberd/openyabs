@@ -1542,7 +1542,7 @@ public class ProductPanel extends javax.swing.JPanel implements DataPanel, MPCBS
 
                 try {
                     Contact cont = (Contact) Popup.SelectValue(Context.getContact());
-                    Export.mail(TemplateHandler.loadTemplate(Long.valueOf(dataOwner.templateGroupIds()), dataOwner.__getInttype()), dataOwner, cont);
+                    Export.mail(TemplateHandler.loadTemplate(Long.valueOf(dataOwner.templateGroupIds()), dataOwner.__getInttype()), dataOwner, cont, null);
                 } catch (Exception ex) {
                     Log.Debug(ex);
                 }

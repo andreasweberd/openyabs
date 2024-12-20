@@ -23,7 +23,8 @@ package mpv5.ui.panels;
 
 
 import mpv5.handler.TemplateHandler;
-import java.awt.Component;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import mpv5.utils.arrays.ArrayUtilities;
 import mpv5.utils.date.DateConverter;
 import mpv5.utils.date.vTimeframe;
 import mpv5.utils.export.DTAFile;
+import mpv5.utils.export.EmailBatch;
 import mpv5.utils.export.Export;
 import mpv5.utils.export.ODTFile2;
 import mpv5.utils.jobs.Job;
@@ -1334,7 +1336,7 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
         TablePopUp tablePopUp = new TablePopUp(jTable1,
                 new String[]{Messages.DELETE.toString(),
                     null, Messages.RELOAD.getValue(),
-                    null, Messages.DTA_CREATE.getValue(),
+                    null, Messages.EMAIL_SEND.getValue(),
                     Messages.PDF_CREATE.getValue(),
                     Messages.ODT_CREATE.getValue(),
                     null, Messages.SET_STATUS_PAID.getValue(),},
@@ -1370,7 +1372,7 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    dta();
+                    email();
                 }
             },
                     new ActionListener() {
@@ -1535,10 +1537,9 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
         new Thread(runnable).start();
     }
 
-    private void dta() {
+    private void email() {
         if (jTable1.getSelectedRowCount() < 1) {
             Popup.notice(Messages.SELECT_AN_INVOICE);
-
         } else {
             ArrayList<Item> items = new ArrayList<Item>();
             for (int i = 0; i < jTable1.getSelectedRows().length; i++) {
@@ -1549,6 +1550,8 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
                     Item item = (Item) obj;
                     if (item.__getIntstatus() != Item.STATUS_PAID) {
                         items.add(item);
+                    }else{
+                        mpv5.YabsViewProxy.instance().addMessage("No email send for already paid invoice: " + item.getCname(), Color.YELLOW);
                     }
                 }
             }
@@ -1560,8 +1563,8 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
             }
 
             DialogForFile d = new DialogForFile(DialogForFile.FILES_ONLY);
-            DTAFile dta = new DTAFile(map);
-            Job job = new Job(dta, d, "DTAUS " + Messages.SAVED); //NOI18N
+            EmailBatch dta = new EmailBatch(map);
+            Job job = new Job(dta, d, "Email-log"); //NOI18N
             job.execute();
 
         }

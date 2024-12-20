@@ -17,8 +17,12 @@
 package mpv5.mail;
 
 import com.sun.mail.smtp.SMTPSSLTransport;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +46,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+
 import mpv5.globals.Messages;
 import mpv5.logging.Log;
 import mpv5.ui.dialogs.Notificator;
@@ -52,7 +57,6 @@ import mpv5.utils.jobs.Waiter;
 /**
  * A simple mail implementation, taken from
  * http://www.tutorials.de/forum/java/255387-email-mit-javamail-versenden.html
- *
  */
 public class SimpleMail implements Waiter {
 
@@ -74,9 +78,9 @@ public class SimpleMail implements Waiter {
     private File attachment;
     private String ccAddress;
     private String senderName;
+    private List<String> log = null;
 
     /**
-     *
      * @param smtpHost
      * @param smtpPort
      * @param username
@@ -102,47 +106,47 @@ public class SimpleMail implements Waiter {
         this.recipientsAddress = recipientsAddress;
         this.subject = subject;
         this.text = text;
-        this.sendMail();
+        this.doSendEmail();
     }
 
     public SimpleMail() {
     }
 
+    public SimpleMail(List<String> log) {
+        this.log = log;
+    }
+
     /**
-     * @author Sateesh Rudrangi
-     * @param smtpHost
-     * @param username
-     * @param password
-     * @param from
-     * @param recipientsAddress
-     * @param subject
-     * @param text
-     * @param attachment
      * @throws MessagingException
+     * @author Sateesh Rudrangi
      */
-    private void sendMail() {
+    private void sendMailAsync() {
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-
-                if (!useSmtps) {
-                    try {
-                        sendSmptmail();
-                    } catch (MessagingException ex) {
-                        Notificator.raiseNotification(new RuntimeException("SMTP From: " + senderAddress + " to: " + recipientsAddress, ex), true);
-                    }
-                } else {
-                    try {
-                        sendSmptsMail();
-                    } catch (Exception ex) {
-                        Notificator.raiseNotification(new RuntimeException("SMTPS From: " + senderAddress + " to: " + recipientsAddress, ex), true);
-                    }
-                }
-
+                doSendEmail();
             }
+
         };
         new Thread(runnable).start();
+    }
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private void doSendEmail() {
+        if (!useSmtps) {
+            try {
+                sendSmptmail();
+            } catch (MessagingException ex) {
+                Notificator.raiseNotification(new RuntimeException("SMTP From: " + senderAddress + " to: " + recipientsAddress, ex), log == null);
+            }
+        } else {
+            try {
+                sendSmptsMail();
+            } catch (Exception ex) {
+                Notificator.raiseNotification(new RuntimeException("SMTPS From: " + senderAddress + " to: " + recipientsAddress, ex), log == null);
+            }
+        }
     }
 
     @Override
@@ -151,14 +155,13 @@ public class SimpleMail implements Waiter {
             try {
                 if (object instanceof Export) {
                     setAttachment(((Export) object).getTargetFile());
-                    sendMail();
+                    doSendEmail();
                 } else {
                     setAttachment((File) object);
-                    sendMail();
+                    doSendEmail();
                 }
             } catch (Exception e) {
                 throw e;
-            } finally {
             }
         } else {
             throw exception;
@@ -427,14 +430,18 @@ public class SimpleMail implements Waiter {
             Transport.send(message);
             mpv5.YabsViewProxy.instance().getProgressbar().setIndeterminate(false);
             Log.Debug(this, "Mail sent: " + message);
-            Popup.notice(Messages.MAIL_SENT + " " + recipientsAddress);
-        } catch (MessagingException messagingException) {
-            Popup.error(messagingException);
+            if (log == null)
+                Popup.notice(Messages.MAIL_SENT + " " + subject + "(" + recipientsAddress + ")");
+            else
+                log.add(LocalDateTime.now().format(formatter) +" " + Messages.MAIL_SENT + " " + subject + "(" + recipientsAddress + ")" + "\n");
+        } catch (Exception messagingException) {
+
             Log.Debug(this, messagingException.getLocalizedMessage());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(SimpleMail.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-// close the connection
+
+            if (log == null)
+                Popup.error(messagingException);
+            else
+                log.add(LocalDateTime.now().format(formatter) +" " + messagingException.getLocalizedMessage() + " " + subject + "(" + recipientsAddress + ")" + "\n");
         }
     }
 
@@ -532,12 +539,16 @@ public class SimpleMail implements Waiter {
             transport.sendMessage(message, message.getAllRecipients());
             mpv5.YabsViewProxy.instance().getProgressbar().setIndeterminate(false);
             Log.Debug(this, "Mail sent: " + message);
-            Popup.notice(Messages.MAIL_SENT + " " + recipientsAddress);
-        } catch (MessagingException messagingException) {
-            Popup.error(messagingException);
+            if (log == null)
+                Popup.notice(Messages.MAIL_SENT + " " + subject + "(" + recipientsAddress + ")");
+            else
+                log.add(LocalDateTime.now().format(formatter) +" " + Messages.MAIL_SENT + " " + subject + "(" + recipientsAddress + ")" + "\n");
+        } catch (Exception messagingException) {
+            if (log == null)
+                Popup.error(messagingException);
+            else
+                log.add(LocalDateTime.now().format(formatter) +" " + messagingException.getLocalizedMessage() + " " + subject + "(" + recipientsAddress + ")" + "\n");
             Log.Debug(this, messagingException.getLocalizedMessage());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(SimpleMail.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
 // close the connection
             if (transport != null) {
@@ -586,6 +597,20 @@ public class SimpleMail implements Waiter {
         bcc.add(ccc);
     }
 
+    /**
+     * @return the senderName
+     */
+    public String getSenderName() {
+        return senderName;
+    }
+
+    /**
+     * @param senderName the senderName to set
+     */
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
     class MailAuthenticator extends Authenticator {
 
         private final String user;
@@ -600,19 +625,5 @@ public class SimpleMail implements Waiter {
         protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(this.user, this.password);
         }
-    }
-
-    /**
-     * @return the senderName
-     */
-    public String getSenderName() {
-        return senderName;
-    }
-
-    /**
-     * @param senderName the senderName to set
-     */
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
     }
 }

@@ -1793,7 +1793,7 @@ public class ProductOrderPanel extends javax.swing.JPanel implements DataPanel, 
 
                 try {
                     Contact cont = dataOwner.getContact();
-                    Export.mail(TemplateHandler.loadTemplate(dataOwner.templateGroupIds(), dataOwner.getInttype()), dataOwner, cont);
+                    Export.mail(TemplateHandler.loadTemplate(dataOwner.templateGroupIds(), dataOwner.getInttype()), dataOwner, cont, null);
                 } catch (Exception ex) {
                     Log.Debug(ex);
                 }

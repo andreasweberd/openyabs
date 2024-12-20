@@ -264,6 +264,7 @@ public enum Messages {
     PROPERTY("Property"),
     VALUE("Value"),
     DTA_CREATE("Create DTAUS"),
+    EMAIL_SEND("Email"),
     REALLY_DELETE2("Do you really want to delete all selected datasets?"),
     REALLY_CHANGE2("Do you really want to change all selected datasets?"),
     PRINTED("Printed item: "),

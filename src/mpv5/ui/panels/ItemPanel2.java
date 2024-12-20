@@ -2998,7 +2998,7 @@ public class ItemPanel2 extends javax.swing.JPanel implements DataPanel, MPCBSel
 
                 try {
                     Contact cont = (Contact) (Contact.getObject(Context.getContact(), dataOwner.__getContactsids()));
-                    Export.mail(TemplateHandler.loadTemplate(dataOwner.templateGroupIds(), dataOwner.__getInttype()), dataOwner, cont);
+                    Export.mail(TemplateHandler.loadTemplate(dataOwner.templateGroupIds(), dataOwner.__getInttype()), dataOwner, cont, null);
                 } catch (NodataFoundException ex) {
                     Log.Debug(ex);
                 }
