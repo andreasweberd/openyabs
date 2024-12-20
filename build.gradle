@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.openyabs'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation fileTree(dir: '/lib', include: ['*.jar'])
+}
+
+compileJava   {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+// Using dependency list to generate a manifest with appropriate classpath
+jar {
+    manifest {
+        attributes 'Main-Class' : 'mpv5.Main'
+        attributes 'Class-Path' : configurations.compileClasspath.collect { 'lib/' + it.getName() }.join(' ')
+        attributes 'Add-Opens' : 'java.base/java.lang=ALL-UNNAMED'
+    }
+}
