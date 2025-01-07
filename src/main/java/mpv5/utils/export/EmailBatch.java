@@ -2,6 +2,7 @@ package mpv5.utils.export;
 
 import dtaus.DTAus;
 import dtaus.Konto;
+import mpv5.YabsViewProxy;
 import mpv5.db.common.Context;
 import mpv5.db.common.DatabaseObject;
 import mpv5.db.common.NodataFoundException;
@@ -11,6 +12,7 @@ import mpv5.globals.Messages;
 import mpv5.handler.TemplateHandler;
 import mpv5.handler.VariablesHandler;
 import mpv5.logging.Log;
+import mpv5.ui.dialogs.Notificator;
 import mpv5.ui.dialogs.Popup;
 import mpv5.utils.date.DateConverter;
 import mpv5.utils.files.FileDirectoryHandler;
@@ -25,7 +27,7 @@ import java.util.List;
 public class EmailBatch extends Exportable implements Waitable {
 
     public EmailBatch(HashMap<String, Object> map) {
-        super(FileDirectoryHandler.getTempFile("export-" + DateConverter.getTodayDBDate(), "email-log.txt").getAbsolutePath());
+        super(FileDirectoryHandler.getTempFile("export-" + System.currentTimeMillis(), "email-log.txt").getAbsolutePath());
         setData(map);
     }
 
@@ -63,7 +65,11 @@ public class EmailBatch extends Exportable implements Waitable {
                 if (TemplateHandler.isLoaded((long) dataOwner.templateGroupIds(), dataOwner.__getInttype())) {
                     try {
                         Contact cont = (Contact) (Contact.getObject(Context.getContact(), dataOwner.__getContactsids()));
+                        YabsViewProxy.instance().setWaiting(true);
+                        YabsViewProxy.instance().setProgressRunning(true);
                         Export.mail(batchTemplate, dataOwner, cont, log, m);
+                        if(!log.isEmpty())
+                           Notificator.raiseNotification(log.get(log.size()-1), false);
                     } catch (NodataFoundException ex) {
                         Log.Debug(ex);
                     }
@@ -71,11 +77,7 @@ public class EmailBatch extends Exportable implements Waitable {
                     log.add(dataOwner.getCname() + ": " + Messages.NO_TEMPLATE_LOADED + " (" + mpv5.db.objects.User.getCurrentUser() + ")\n");
                 }
             }
-
-            FileReaderWriter w = new FileReaderWriter(this);
-            w.writeOnce(log.toString());
             Popup.notice(log, Messages.DONE);
-
         } catch (Exception ex) {
             Log.Debug(ex);
         } finally {

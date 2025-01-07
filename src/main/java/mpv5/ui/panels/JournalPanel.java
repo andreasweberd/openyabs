@@ -22,11 +22,13 @@
 package mpv5.ui.panels;
 
 
+import mpv5.YabsViewProxy;
 import mpv5.handler.TemplateHandler;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -61,6 +63,7 @@ import mpv5.globals.GlobalSettings;
 import mpv5.globals.Messages;
 import mpv5.logging.Log;
 import mpv5.ui.dialogs.DialogForFile;
+import mpv5.ui.dialogs.Notificator;
 import mpv5.ui.dialogs.Popup;
 import mpv5.ui.misc.MPTable;
 import mpv5.ui.popups.TablePopUp;
@@ -71,8 +74,10 @@ import mpv5.utils.export.DTAFile;
 import mpv5.utils.export.EmailBatch;
 import mpv5.utils.export.Export;
 import mpv5.utils.export.ODTFile2;
+import mpv5.utils.files.FileDirectoryHandler;
 import mpv5.utils.jobs.Job;
 import mpv5.utils.jobs.Waitable;
+import mpv5.utils.jobs.Waiter;
 import mpv5.utils.models.MPTableModel;
 import mpv5.utils.models.MPTreeModel;
 import mpv5.utils.tables.ExcelAdapter;
@@ -1541,6 +1546,7 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
         if (jTable1.getSelectedRowCount() < 1) {
             Popup.notice(Messages.SELECT_AN_INVOICE);
         } else {
+            YabsViewProxy.instance().setWaiting(true);
             ArrayList<Item> items = new ArrayList<Item>();
             for (int i = 0; i < jTable1.getSelectedRows().length; i++) {
 
@@ -1562,9 +1568,18 @@ public class JournalPanel extends javax.swing.JPanel implements ListPanel {
                 map.put(item.__getCnumber(), item);
             }
 
-            DialogForFile d = new DialogForFile(DialogForFile.FILES_ONLY);
             EmailBatch dta = new EmailBatch(map);
-            Job job = new Job(dta, d, "Email-log"); //NOI18N
+            Job job = new Job(dta, new Waiter() {
+                @Override
+                public void set(Object object, Exception exceptions) throws Exception {
+                    YabsViewProxy.instance().setWaiting(true);
+                    if (exceptions != null) {
+                        Notificator.raiseNotification(exceptions, false);
+                        Log.Debug(exceptions);
+                    }
+                    YabsViewProxy.instance().setWaiting(false);
+                }
+            }, "Emails: " + Messages.DONE); //NOI18N
             job.execute();
 
         }

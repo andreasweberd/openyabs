@@ -123,7 +123,7 @@ public class DialogForFile extends JFileChooser implements Waiter {
       }
    };
    private File file = null;
-   public static File CURRENT_DIR = new File(Main.USER_HOME);
+   public static File CURRENT_DIR = new File(Main.DESKTOP);
    private Container mparent;
 
    /**

@@ -789,9 +789,9 @@ public class Main implements Runnable {
         splash.dispose();
 
         if (!HEADLESS) {
-            if (START_SERVER) {
-                MPServer.runServer();
-            }
+//            if (START_SERVER) {
+//                MPServer.runServer();
+//            }
         }
 
         /* Runnable runnable3 = new Runnable() {
@@ -812,24 +812,24 @@ public class Main implements Runnable {
         }
 
         if (!HEADLESS) {
-            if (GlobalSettings.getBooleanProperty("org.openyabs.updates.enable") && !LocalSettings.getBooleanProperty(LocalSettings.SUPPRESS_UPDATE_CHECK)) {
-                Runnable runnable1 = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (checkUpdates()) {
-                            Notificator.raiseNotification(Messages.UPDATE_AVAILABLE, false);
-                        }
-                    }
-                };
-
-                new Thread(runnable1).start();
-            }
+//            if (GlobalSettings.getBooleanProperty("org.openyabs.updates.enable") && !LocalSettings.getBooleanProperty(LocalSettings.SUPPRESS_UPDATE_CHECK)) {
+//                Runnable runnable1 = new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        if (checkUpdates()) {
+//                            Notificator.raiseNotification(Messages.UPDATE_AVAILABLE, false);
+//                        }
+//                    }
+//                };
+//
+//                new Thread(runnable1).start();
+//            }
         }
 
 
         if (!HEADLESS) {
-            checkTpls();
+           // checkTpls();
         }
     }
 
@@ -1081,7 +1081,7 @@ public class Main implements Runnable {
                         }
                     } catch (NodataFoundException ex) {
                         Log.Debug(this, ex.getMessage());
-                        YabsViewProxy.instance().addMessage(Messages.NO_TEMPLATE_DEFINDED, Color.YELLOW);
+                       // YabsViewProxy.instance().addMessage(Messages.NO_TEMPLATE_DEFINDED, Color.YELLOW);
                     }
                 }
             };

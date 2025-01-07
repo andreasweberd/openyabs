@@ -20,6 +20,7 @@ test {
 
 dependencies {
     implementation fileTree(dir: '/lib', include: ['*.jar'])
+    implementation 'org.mustangproject:library:2.15.2'
 }
 
 compileJava   {

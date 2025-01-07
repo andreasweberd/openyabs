@@ -21,6 +21,7 @@ import mpv5.logging.Log;
 import mpv5.ui.panels.ContactPanel;
 import mpv5.utils.images.MPIcon;
 import mpv5.utils.text.RandomText;
+import org.mustangproject.TradeParty;
 
 /**
  *
@@ -776,5 +777,9 @@ public class Contact extends DatabaseObject implements Formattable, Templateable
         }
 
         return save();
+    }
+
+    public TradeParty asZugpferdTradeparty() {
+        return new TradeParty("Franz Müller", "teststr.12", "55232", "Entenhausen", "DE");
     }
 }

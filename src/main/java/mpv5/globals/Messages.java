@@ -5,6 +5,7 @@
 package mpv5.globals;
 
 import java.util.*;
+
 import mpv5.logging.Log;
 import mpv5.i18n.LanguageManager;
 
@@ -370,7 +371,9 @@ public enum Messages {
     TYPE_DEPOSIT("Deposit"), 
     LANG_NOT_EXPORTED("Language could not be exported:"), 
     ADD_MISSING_KEYS("Please add Missing keys to "), 
-    LANGUAGE_UPDATED("The current language file has been updated.");
+    LANGUAGE_UPDATED("The current language file has been updated."),
+    CREATE_X_INVOICE("Create xml invoice");
+
 
     /**
      * @return the missing

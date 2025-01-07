@@ -91,6 +91,7 @@ import mpv5.usermanagement.MPSecurityManager;
 import mpv5.utils.arrays.ArrayUtilities;
 import mpv5.utils.date.DateConverter;
 import mpv5.utils.export.Export;
+import mpv5.utils.export.ZugpferdFile;
 import mpv5.utils.files.FileDirectoryHandler;
 import mpv5.utils.jobs.Job;
 import mpv5.utils.models.MPComboBoxModelItem;
@@ -354,6 +355,18 @@ public class ItemPanel2 extends javax.swing.JPanel implements DataPanel, MPCBSel
                 toInvoice(Item.TYPE_PART_PAYMENT);
             }
         });
+        toinvoice.add(Messages.CREATE_X_INVOICE.toString(), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toXInvoice();
+            }
+        });
+    }
+
+    private void toXInvoice() {
+        //DialogForFile d = new DialogForFile(DialogForFile.DIRECTORIES_ONLY);
+        //Job job = new Job(new ZugpferdFile(), d, files.size() + " PDF " + Messages.SAVED); //NOI18N
+        //job.execute();
     }
 
     private void setContactData(Contact dbo) {

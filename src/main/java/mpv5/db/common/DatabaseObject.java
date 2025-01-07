@@ -2070,7 +2070,7 @@ public abstract class DatabaseObject implements Comparable<DatabaseObject>, Seri
                         if (select.getData()[i][j] != null) {
                             invoke(m, select.getData()[i][j], dbo, "DatabaseObject");
                         }
-                    } else if (name.endsWith("ids")
+                    } else if (name.endsWith("ids") && name.length()>6
                             && (vars.containsKey(name.substring(0, name.length() - 3)) || vars.containsKey(name.substring(0, name.length() - 4)))) {
                         Method m = vars.get(name.substring(0, name.length() - 3));
                         if (m == null) {
@@ -2732,20 +2732,30 @@ public abstract class DatabaseObject implements Comparable<DatabaseObject>, Seri
         return evaluateAll(t, false);
     }
 
+    private static final String HEX_WEBCOLOR_PATTERN = "^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$";
+    private static final Pattern pattern = Pattern.compile(HEX_WEBCOLOR_PATTERN);
+    public static boolean isValidHexColor(final String colorCode) {
+        Matcher matcher = pattern.matcher(colorCode);
+        return matcher.matches();
+    }
+
     public String evaluateAll(String text, boolean showError) {
-        String sm = GlobalSettings.getProperty("org.openyabs.config.scriptsymbol", "#");
-        Pattern SCRIPTPATTERN = Pattern.compile("\\" + sm + "(.*?)\\" + sm + "", Pattern.DOTALL);
-        Matcher scriptmatcher = SCRIPTPATTERN.matcher(text);
+        final String sm = GlobalSettings.getProperty("org.openyabs.config.scriptsymbol", "#");
+        final Pattern SCRIPTPATTERN = Pattern.compile("\\" + sm + "(.*?)\\" + sm);
+        final Matcher scriptmatcher = SCRIPTPATTERN.matcher(text);
         Log.Debug(this, "script text:" + text);
         while (scriptmatcher.find()) {
             try {
                 String script = scriptmatcher.group(1);
                 String orig = scriptmatcher.group(0);
                 Log.Debug(this, "script:" + script);
-                if (script.startsWith(sm) && script.endsWith(sm)) {
+                //fixme this seems awkward
+                if ( script.startsWith(sm) && script.endsWith(sm)) {
                     script = script.substring(1, script.length() - 1);
                 }
-                text = text.replace(orig, doEvaluate(script));
+                //there is a clash with the default script pattern
+                if(!isValidHexColor("#" + script))
+                   text = text.replace(orig, doEvaluate(script));
             } catch (Exception e) {
                 Log.Debug(this, e);
                 if (showError) {

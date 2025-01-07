@@ -43,6 +43,8 @@ import mpv5.ui.panels.ItemPanel2;
 import mpv5.utils.date.DateConverter;
 import mpv5.utils.models.MPComboBoxModelItem;
 import mpv5.utils.models.MPTableModel;
+import org.mustangproject.ZUGFeRD.IZUGFeRDExportableItem;
+
 import static mpv5.utils.numberformat.FormatNumber.*;
 
 /**
@@ -1089,5 +1091,15 @@ public final class SubItem extends DatabaseObject implements Triggerable {
             }
         }
         return null;
+    }
+
+    public IZUGFeRDExportableItem asZugpferdSubitem() {
+        return new org.mustangproject.Item(
+                new org.mustangproject.Product(getCname(),
+                __getDescription(),
+                __getMeasure(),
+                __getTaxpercentvalue()),
+                __getTotalbrutvalue(),
+                __getQuantityvalue());
     }
 }
