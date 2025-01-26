@@ -211,7 +211,7 @@ public class ODTFile2 extends Exportable {
     }
 
     private void filltable(int index, String[] cols, Object tablel, FieldsMetadata metadata, IContext context) {
-        boolean addMeta = true;
+        //boolean addMeta = true;
         int ix = 0;
         if (tablel instanceof List) {
             List list = (List) tablel;
@@ -222,16 +222,23 @@ public class ODTFile2 extends Exportable {
                 Log.Debug(this, "Table " + index + " row " + ix + ": " + Arrays.asList(tableData));
                 int i = 0;
                 Map<String, String> xtable = new HashMap<String, String>();
+                for (int j = 0; j < 10; j++) {
+                    xtable.put("C" + j, " ");
+                    metadata.addFieldAsList(KEY_TABLE + index + "." + "C" + j);
+                }
                 for (String s1 : cols) {
-                    int col = Integer.valueOf(s1) - 1;
+                    int col = Integer.parseInt(s1) - 1;
 
+                    //Log.Debug(this, "col-> " + col);
                     if (tableData.length > col) {
                         String colname = "C" + i++;
                         xtable.put(colname, tableData[col]);
-                        if (addMeta) {
-                            metadata.addFieldAsList(KEY_TABLE + index + "." + colname);
-                            //metadata.addField(KEY_TABLE + index + "." + colname, true, null, SyntaxKind.Html.name(), false);
-                        }
+
+                        //Log.Debug(this, "colname: " + colname + " tableData[col]: " + tableData[col]);
+                        //if (addMeta) {
+                        //     metadata.addFieldAsList(KEY_TABLE + index + "." + colname);
+                        //metadata.addField(KEY_TABLE + index + "." + colname, true, null, SyntaxKind.Html.name(), false);
+                        //}
                     } else {
                         Notificator.raiseNotification("Invalid column definition in " + this.getTemplate().getCname() + ": " + col + ">" + (tableData.length - 1) + ")", false);
                     }
@@ -244,8 +251,9 @@ public class ODTFile2 extends Exportable {
                     }
                 }*/
 
+                Log.Debug(this, "resolved xtable: " + xtable);
                 positions.add(xtable);
-                addMeta = false;
+                //addMeta = false;
             }
             context.put(KEY_TABLE + index, positions);
         } else {
