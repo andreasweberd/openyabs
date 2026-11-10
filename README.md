@@ -236,7 +236,7 @@ YaBS runs on **Windows, Linux and macOS**.
 
 **ZIP for all systems** (needs **Java 21** or newer, e.g. from [adoptium.net](https://adoptium.net)): unpack and start `yabs.bat` (Windows) or `yabs.sh` (Linux, macOS) – or `java -jar openyabs.jar`.
 
-All downloads: **[Releases](https://github.com/andreasweberd/openyabs/releases)** – `latest-master` is the current development build.
+All downloads: **[Releases](https://github.com/andreasweberd/openyabs/releases)**. Development builds are available as artifacts in the *Build* workflow runs.
 
 On the first start one window asks where your data should be stored: **on this computer** (one click) or on a **database server** (MySQL / MariaDB, Derby). The setup runs in the background; languages, countries and an invoice template are set up automatically, German systems start in German, and you are signed in as `admin` (password `password` – change it under *Settings › Users*). Your company data goes to *Settings › Company Info*. No account, no internet connection needed.
 
@@ -258,6 +258,8 @@ Details (German): [docs/Hinweise.md](docs/Hinweise.md).
 The ZIP is created in `build/distributions/`. Java 21 is required. After `./gradlew build` (or `jar`), the libraries are copied to `build/libs/lib/`, so `java -jar build/libs/openyabs.jar` starts right away (a `-cp` option is ignored by `java -jar`). Pushes to `master` and version tags build the ZIP and the installer packages on GitHub Actions.
 
 Versions: builds of `master` are **2.0.&lt;build number&gt;** (shown on the splash screen and in *Help › About*), releases carry the version of their tag (`v2.1.0` → 2.1.0), local builds are `2.0-dev` (`./gradlew distributionZip -PreleaseVersion=2.0.5` sets one).
+
+To publish a release, manually run **Actions > Release > Run workflow** on the branch to release (normally `master`). Each run selects the next patch version from the highest stable `vMAJOR.MINOR.PATCH` tag, starting at `v2.0.0` when none exists; legacy and prerelease tags are ignored. After the tests and all installer builds succeed, it creates an annotated tag at the selected commit and publishes a GitHub release with generated release notes, the ZIP, Windows MSI, Linux DEB/RPM, both macOS DMGs and `SHA256SUMS`. The same files are retained as Actions artifacts. Pushes and manual runs of *Build* never publish GitHub releases.
 
 ## Help, community and license
 

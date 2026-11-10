@@ -244,6 +244,8 @@ Beim ersten Programmstart fragt ein Assistent nach dem Speicherort: **Auf diesem
 
 Das ZIP-Paket wird im Ordner `build/distributions/` erstellt. Voraussetzung ist Java 21. Nach `./gradlew build` kopiert Gradle alle Abhängigkeiten nach `build/libs/lib/`, sodass `java -jar build/libs/openyabs.jar` direkt startet.
 
+Releases werden nur manuell unter **Actions > Release > Run workflow** erstellt (normalerweise vom Branch `master`). Der Workflow erhöht die Patch-Version des höchsten stabilen Tags `vMAJOR.MINOR.PATCH`; ohne solchen Tag beginnt er mit `v2.0.0`. Nach erfolgreichen Tests und allen Installer-Builds erstellt er einen annotierten Tag und ein GitHub-Release mit ZIP, MSI, DEB, RPM, beiden macOS-DMGs, generierten Release Notes und `SHA256SUMS`. Die Dateien bleiben auch als Actions-Artefakte verfügbar. Pushes und manuelle *Build*-Läufe veröffentlichen keine Releases.
+
 ## Hilfe, Community und Lizenz
 
 - Plugins erstellen: [docs/Plugins.md](docs/Plugins.md)
