@@ -4,7 +4,7 @@
 
 Frei und Open Source (GPL v3) · Windows, Linux und macOS · Keine Cloud, kein Account, kein Abonnement
 
-**[⬇ Neueste Version herunterladen](https://github.com/andreasweberd/openyabs/releases)** · [Hinweise und Neuerungen](docs/Hinweise.md) · [E-Rechnung (XRechnung / ZUGFeRD)](docs/E-Rechnung.md)
+**[⬇ Neueste Version herunterladen](https://github.com/anti43/openyabs/releases)** · [Hinweise und Neuerungen](docs/Hinweise.md) · [E-Rechnung (XRechnung / ZUGFeRD)](docs/E-Rechnung.md)
 
 ![Ein Auftrag in YaBS: Kunde, Belegdaten und Termine in Kacheln, darunter die Positionen mit Netto, MwSt. und Gesamt](docs/images/invoice.png)
 
@@ -225,7 +225,7 @@ YaBS läuft auf **Windows, Linux und macOS**.
 
 **Plattformunabhängiges ZIP** (benötigt **Java 21** oder neuer, z. B. von [adoptium.net](https://adoptium.net)): Entpacken und `yabs.bat` (Windows) oder `yabs.sh` (Linux/macOS) ausführen – oder `java -jar openyabs.jar`.
 
-Alle Downloads: **[Releases auf GitHub](https://github.com/andreasweberd/openyabs/releases)**
+Alle Downloads: **[Releases auf GitHub](https://github.com/anti43/openyabs/releases)**
 
 Beim ersten Programmstart fragt ein Assistent nach dem Speicherort: **Auf diesem Computer** (ein Klick, Standard) oder auf einem **Datenbankserver** (MySQL / MariaDB). Die Einrichtung erfolgt automatisch, deutsche Systeme starten auf Deutsch und Sie sind als `admin` (Passwort `password` – bitte unter *Einstellungen › Benutzer* ändern) angemeldet.
 
